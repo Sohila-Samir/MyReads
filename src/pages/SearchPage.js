@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom"
-import { useState, useEffect } from "react"
-import { search } from "../utils/BooksAPI"
-import ListBooks from "../components/ListBooks"
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import ListBooks from "../components/ListBooks";
+import { search } from "../utils/BooksAPI";
 
 const SearchPage = ({
   mainBooks,
@@ -9,38 +9,42 @@ const SearchPage = ({
   onNewShelfValue,
   onBookID,
   bookID,
-  newShelfValue
+  newShelfValue,
 }) => {
   // states
-  const [queryResult, setQueryResult] = useState([])
-  const [query, setQuery] = useState('')
+  const [queryResult, setQueryResult] = useState([]);
+  const [query, setQuery] = useState("");
   // ---------------------------------------------END STATES--------------------------------------
 
   // effects
   useEffect(() => {
+    let searchBook;
     if (query) {
-      setQueryResult([])
-      const queryBooks = async () => {
-        const queriedData = await search(query, 20)
-        setQueryResult(queriedData)
-      }
-      queryBooks()
+      searchBook = setTimeout(async () => {
+        const queriedData = await search(query);
+        console.log(queriedData);
+        setQueryResult(queriedData);
+      }, 800);
     }
-    setQueryResult([])
-  }, [query])
+
+    return () => {
+      setQueryResult([]);
+      clearTimeout(searchBook);
+    };
+  }, [query]);
   // ---------------------------------------------END EFFECTS--------------------------------------
 
   // event handlers
   const handleChange = (e) => {
-    setQuery(e.target.value)
-  }
+    setQuery(e.target.value);
+  };
   // -----------------------------------------END EVENT HANDLERS--------------------------------------
 
   // helper variables
-  const showQueriedResult = queryResult.length ? queryResult : ""
+  const showQueriedResult = queryResult.length ? queryResult : "";
   // ---------------------------------------------END VARIABLES--------------------------------------
 
-  return(
+  return (
     <div>
       <div className="search-books">
         <div className="search-books-bar">
@@ -51,30 +55,30 @@ const SearchPage = ({
             <input
               type="text"
               placeholder="Search by title, author, or ISBN"
-              onKeyUp={handleChange}
+              onChange={handleChange}
             />
           </div>
         </div>
 
         <div className="search-books-results">
-          {
-            showQueriedResult
-            ? <ListBooks
-                books={queryResult}
-                mainBooks={mainBooks}
-                onIsBookUpdated={onIsBookUpdated}
-                onNewShelfValue={onNewShelfValue}
-                onBookID={onBookID}
-                bookID={bookID}
-                newShelfValue={newShelfValue}
-              />
-            : query
-            ? <h2 className="no-books-msg">No Books Found</h2>
-            : ""
-          }
+          {showQueriedResult ? (
+            <ListBooks
+              books={queryResult}
+              mainBooks={mainBooks}
+              onIsBookUpdated={onIsBookUpdated}
+              onNewShelfValue={onNewShelfValue}
+              onBookID={onBookID}
+              bookID={bookID}
+              newShelfValue={newShelfValue}
+            />
+          ) : query ? (
+            <h2 className="no-books-msg">No Books Found</h2>
+          ) : (
+            ""
+          )}
         </div>
       </div>
     </div>
-  )
-}
-export default SearchPage
+  );
+};
+export default SearchPage;
